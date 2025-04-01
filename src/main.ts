@@ -115,7 +115,7 @@ export class Node<T = unknown> {
         for( let c = 0; c < cLen; c++ ) {
             const grandSuccessors = cNodes[ c ].asArray( depth + 1 );
             for( let gLen = grandSuccessors.length, g = 0; g < gLen; g++ ) {
-                if( this._pNode !== null ) {
+                if( !this.isRoot ) {
                     grandSuccessors[ g ][ depth - 1 ] = this._data;
                 }
                 successors.push( grandSuccessors[ g ] );
