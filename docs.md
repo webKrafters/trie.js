@@ -19,6 +19,18 @@ npm install --save @webkrafters/trie
 
 # Usage
 
+## First Things First
+### Define "complete sequence".
+<p>A complete sequence is an instant sequential data placed in a Trie instance at a specific point in time.</p>
+<p>Consider we placed in a hypothetical Trie instance the following three entries:</p>
+<ol>
+  <li>[ 'u','t', 'a', 'h' ]</li>
+  <li>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ]</li>
+  <li>[ 'o', 'h', 'i', 'o' ]</li>
+</ol>
+<p>The Trie instance now comprises 3 complete seqeuences.</p>
+<p>The following sequence [ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ], though present in the instance, is currently not a compelete sequence. But once we add it, it then becomes a compelete sequence.</p>
+
 ## Constructor (4 Overloads)
 ```tsx
 1. constructor(data?: Trie<T>, opts?: Options<T>);
@@ -51,7 +63,7 @@ const trie = new Trie<string>([
 
 ### isEmpty
 #### readonly
-<p>Confirms if this instance contains any complete in it.</p>
+<p>Confirms if this instance contains any complete sequence in it.</p>
 
 ```tsx
 isEmpty: boolean
@@ -103,7 +115,7 @@ clone(): Trie<T>
 ### getAllStartingWith
 
 <p>
-Produces all complete sequences that begins with the prefix sequence.
+Produces all complete sequences that begin with the prefix sequence.
 </p>
 <p>
 <strong>Note:</strong><br /> 
@@ -152,7 +164,7 @@ Confirms that the supplied graph is a data equivalent of this instance.
 ```
 ### merge (2 Overloads)
 <p>
-Merges data into tree data into this instance.
+Merges tree data into this instance.
 </p>
 
 ```tsx
@@ -163,7 +175,9 @@ Merges data into tree data into this instance.
 ```
 ### remove
 <p>
-Accepts a sequence of items to remove from this instance if a matchign complete sequence located.
+Accepts a sequence of items to remove from this instance if a matching complete sequence located.
+</p>
+<p>
 Returns <code>true</code> if found and removed.
 </p>
 
@@ -172,7 +186,7 @@ Returns <code>true</code> if found and removed.
 ```
 ### removeAllStartingWith
 <p>
-Removes all complete sequences that begins with the prefix sequence.
+Removes all complete sequences that begin with the prefix sequence.
 </p>
 <p>
 <strong>Note:</strong><br />
@@ -202,7 +216,8 @@ removeMany(data : Array<Array<T>>): Array<OpStatus>
 ## Static
 
 ### makeTrieable
-<p>Converts any nested object by applying a keyMapping to a TrieableNode which could be converted into a Trie instance.</p>
+<p>Converts any nested object to a TrieableNode by applying a keyMapping.</p>
+<p>The generated TrieaNode object could then be supplied a Trie instance.</p>
 
 ```tsx
 makeTrieable<T>(
@@ -290,8 +305,14 @@ const trieableNode = Trie.makeTrieable( nested, keyMap );
 <strong><u>More on the KeyMap object:</u></strong><br />
 <p>The <code>KeyMap</code> object maps properties in the nested object to corresponding TrieableNode properties.</p>
 <p><code>KeyMap.children</code> can be:
-<ol>either an ordered array containing various names of individual properties within the nested object to combine into an array as the children of a TrieableNode</ol>
-<ol>or a single value holding the name of a property within the nested object with either a single value or an iterable to be transfered into the children property of a TrieableNode.</ol>
+<ol>
+  <li>
+  either an ordered array containing various names of individual properties within the nested object to combine into an array as the children of a TrieableNode
+  </li>
+  <li>
+    or a single value holding the name of a property within the nested object with either a single value or an iterable to be     transfered into the children property of a TrieableNode.
+  </li>
+</ol>
 </p> 
 
 # License
