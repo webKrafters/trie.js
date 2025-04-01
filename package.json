@@ -51,7 +51,6 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc && babel dist -d dist",
-    "postbuild": "node post-build.js",
     "test": "jest --coverage --updateSnapshot",
     "test:clean": "jest --clearCache",
     "test:core": "jest --updateSnapshot",
