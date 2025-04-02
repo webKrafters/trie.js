@@ -29,7 +29,7 @@ npm install --save @webkrafters/trie
   <li><code>[ 'o', 'h', 'i', 'o' ]</code></li>
 </ol>
 <p>The Trie instance now comprises 3 complete seqeuences.</p>
-<p>The following sequence <code>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ]</code>, though present in the instance, is currently not a complete sequence. But once we add it, it then becomes a complete sequence.</p>
+<p>The following sequence <code>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ]</code>, though present in the instance, is currently an incomplete sequence. But once we add it, it then becomes a complete sequence.</p>
 
 ## Constructor (4 Overloads)
 ```tsx
