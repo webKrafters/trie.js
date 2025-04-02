@@ -532,6 +532,7 @@ export default class Trie<T = unknown> {
         for( let c = cNodes.length; c--; ) {
             if( this.isSameValue( cNodes[ c ].data, suffixStartNode.data  ) ) {
                 suffixStartNode.parentNode.childNodes.splice( c, 1 );
+                return;
             }
         }
     }
