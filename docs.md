@@ -310,7 +310,7 @@ const trieableNode = Trie.makeTrieable( nested, keyMap );
     either <u>a single value</u> holding the name of a property within the nested object. The data in this property is either a single value or an iterable. This data will be transfered into the children property of a TrieableNode.
   </li>
   <li>
-    or <u>an ordered array</u> containing various names of individual properties within the nested object. The data in each property will be transfered into an array index of a TrieableNode children property. The index coreesponds to the index of the key within <code>KeyMap.children</code>. <strong><i>NOTE:</i></strong> in case of any key whose property is missing in the nested object, a <code>null</code> value will be assigned in its place.
+    or <u>an ordered array</u> containing various names of individual properties within the nested object. The data in each property will be transfered into an array index of a TrieableNode children property. The index coreesponds to the index of the key within <code>KeyMap.children</code>. <strong><u>NOTE:</u></strong> in case of any key whose property is missing in the nested object, a <code>null</code> value will be assigned in its place.
   </li>
 </ol>
 </p> 
