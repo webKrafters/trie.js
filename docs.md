@@ -24,12 +24,12 @@ npm install --save @webkrafters/trie
 <p>A complete sequence is an instant sequential data placed in a Trie instance at a specific point in time.</p>
 <p>Consider we placed in a hypothetical Trie instance the following three entries:</p>
 <ol>
-  <li>[ 'u','t', 'a', 'h' ]</li>
-  <li>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ]</li>
-  <li>[ 'o', 'h', 'i', 'o' ]</li>
+  <li><code>[ 'u','t', 'a', 'h' ]</code></li>
+  <li><code>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ]</code></li>
+  <li><code>[ 'o', 'h', 'i', 'o' ]</code></li>
 </ol>
 <p>The Trie instance now comprises 3 complete seqeuences.</p>
-<p>The following sequence [ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ], though present in the instance, is currently not a complete sequence. But once we add it, it then becomes a complete sequence.</p>
+<p>The following sequence <code>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ]</code>, though present in the instance, is currently not a complete sequence. But once we add it, it then becomes a complete sequence.</p>
 
 ## Constructor (4 Overloads)
 ```tsx
