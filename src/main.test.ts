@@ -201,6 +201,31 @@ describe( 'Trie class', () => {
             test( 'confirms if this instance is devoid of data2', () => {
                 expect( new Trie( arrayifiedNode ).isEmpty ).toBe( false );
             } );
+            test( 'confirms that a trie w/o any complete sequence is devoid of data', () => {
+                expect( new Trie<string|number>({
+                    data: null,
+                    children: [{
+                        data: 22,
+                        children: [{
+                            data: 788,
+                            children: [{
+                                data: 'a',
+                                children: []
+                            }]
+                        },{
+                            data: 21,
+                            children: [{
+                                data: 't'
+                            }, {
+                                data: 97,
+                                children: [{
+                                    data: 'z',
+                                }]
+                            }]
+                        }]
+                    }]
+                }).isEmpty ).toBe( true );
+            } );
         } );
         describe( 'size', () => {
             test( 'returns number of complete sequences', () => {

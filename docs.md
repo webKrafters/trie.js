@@ -217,7 +217,7 @@ removeMany(data : Array<Array<T>>): Array<OpStatus>
 
 ### makeTrieable
 <p>Converts any nested object to a TrieableNode by applying a keyMapping.</p>
-<p>The generated TrieaNode object could then be supplied a Trie instance.</p>
+<p>The generated TrieableNode object could then be supplied to a Trie instance.</p>
 
 ```tsx
 makeTrieable<T>(
@@ -241,7 +241,7 @@ A TrieableNode<T> mapping to a complete Trie<T> instance has the following root 
 <p>Here is a sample call:</p>
 
 ```tsx
-// assuming the following nested object to convert 
+/* assuming the following nested object to convert */
 const nested = {
     x: {
         w: true,
@@ -307,10 +307,10 @@ const trieableNode = Trie.makeTrieable( nested, keyMap );
 <p><code>KeyMap.children</code> can be:
 <ol>
   <li>
-  either an ordered array containing various names of individual properties within the nested object to combine into an array as the children of a TrieableNode
+    either <u>a single value</u> holding the name of a property within the nested object. The data in this property is either a single value or an iterable. This data will be transfered into the children property of a TrieableNode.
   </li>
   <li>
-    or a single value holding the name of a property within the nested object with either a single value or an iterable to be     transfered into the children property of a TrieableNode.
+    or <u>an ordered array</u> containing various names of individual properties within the nested object. The data in each property will be transfered into an array index of a TrieableNode children property. The index coreesponds to the index of the key within <code>KeyMap.children</code>. <strong><i>NOTE:</i></strong> in case of any key whose property is missing in the nested object, a <code>null</code> value will be assigned in its place.
   </li>
 </ol>
 </p> 

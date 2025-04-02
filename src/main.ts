@@ -70,6 +70,13 @@ export class Node<T = unknown> {
     }
     get childNodes() { return this._cNodes }
     get data() { return this._data }
+    get isEmpty() {
+        if( this._isSequenceBoundary && !this.isRoot ) { return false }
+        for( let cNodes = this._cNodes, c = cNodes.length; c--; ) {
+            if( !cNodes[ c ].isEmpty ) { return false }
+        }
+        return true;
+    }
     get isRoot() { return !this._pNode }
     get isSequenceBoundary() { return this._isSequenceBoundary }
     set isSequenceBoundary( flag : boolean ) { this._isSequenceBoundary = flag }
@@ -191,7 +198,7 @@ export class Node<T = unknown> {
             match.isSequenceBoundary = node.isSequenceBoundary;
         }
         for( let d = 0, data = node.childNodes, dLen = data.length; d < dLen; d++ ) {
-            match.merge( data[ d ] )
+            match.merge( data[ d ] );
         }
         return;
     }
@@ -413,7 +420,7 @@ export default class Trie<T = unknown> {
         );
     }
 
-    get isEmpty() { return !this.size }
+    get isEmpty() { return this.root.isEmpty }
 
     get size () { return this.asArray().length }
 
