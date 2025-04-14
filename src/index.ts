@@ -1,5 +1,3 @@
-import Trie from './main';
-
 export type {
     EqualityFn, 
     Options,
@@ -10,4 +8,4 @@ export type {
     TrieableNodeKeyMapping
 } from './main';
 
-export default Trie;
+export { default as default } from './main';

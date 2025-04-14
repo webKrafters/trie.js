@@ -218,7 +218,7 @@ export default class Trie<T = unknown> {
 
     get isEmpty() { return this.root.isEmpty }
 
-    get size () { return this.asArray().length }
+    get size () { return this.root.size }
 
     /**
      * @template {T = unknown}
@@ -383,18 +383,12 @@ export class Node<T = unknown> {
     }
     get childNodes() { return this._cNodes }
     get data() { return this._data }
-    get isEmpty() {
-        if( this._isSequenceBoundary && !this.isRoot ) { return false }
-        for( let cNodes = this._cNodes.list(), c = cNodes.length; c--; ) {
-            if( !cNodes[ c ].isEmpty ) { return false }
-        }
-        return true;
-    }
+    get isEmpty() { return !this._countSequences( 1 ) }
     get isRoot() { return !this._pNode }
     get isSequenceBoundary() { return this._isSequenceBoundary }
     set isSequenceBoundary( flag : boolean ) { this._isSequenceBoundary = flag }
     get parentNode () { return this._pNode }
-
+    get size() { return this._countSequences() }
     addChild( childData : Array<T> ) {
         if( !childData.length ) {
             if( !this.isRoot ) {
@@ -415,7 +409,6 @@ export class Node<T = unknown> {
                 childData.length === 0
             ) );
     }
-
     /** converts this node into sequences of data */
     asArray( depth = 0 ) {
         const successors : Array<Array<T>> = [];
@@ -437,7 +430,6 @@ export class Node<T = unknown> {
         }
         return successors;
     }
-
     /** converts this node into a trieableNode */
     asTrieableNode( parentTrieableNode : TrieableNode<T> = null ) {
         const trieableNode : TrieableNode<T> = {
@@ -451,9 +443,7 @@ export class Node<T = unknown> {
         }
        return trieableNode;
     }
-
     empty() { this._cNodes.clear() }
-
     getChildPrefixEnd({ length: pLen, ...prefix } : Array<T> = [] ) {
         if( !pLen ) { return null }
         let p = 0;
@@ -466,11 +456,9 @@ export class Node<T = unknown> {
         } while( p < pLen );
         return currentNode;
     }
-
     hasChild( childData : Array<T> ) {
         return !!this.getChildPrefixEnd( childData )?._isSequenceBoundary;
     }
-
     isEqual( graph : Array<Array<T>> ) : boolean;
     isEqual( graph : Node<T> ) : boolean;
     isEqual( graph : TrieableNode<T> ) : boolean;
@@ -507,7 +495,6 @@ export class Node<T = unknown> {
         }
         return !cArr.length;
     }
-
     merge( node : Node<T> ) {
         let match = this._cNodes.get( node.data );
         if( match === null ) {
@@ -522,7 +509,6 @@ export class Node<T = unknown> {
         }
         return;
     }
-
     mergeTrieableNode( trieableNode : TrieableNode<T> ) {
         let match = this._cNodes.get( trieableNode.data );
         if( match === null ) {
@@ -544,12 +530,18 @@ export class Node<T = unknown> {
         }
         return;
     }
-
     removeChild( childData : Array<T> ) {
         const status = this._removeChild( childData );
         return status === Status.REMOVED || status === Status.UPDATED;
     }
-
+    private _countSequences( minCount = 0, count = { value: 0 } ) {
+        count.value += this._isSequenceBoundary && !this.isRoot ? 1 : 0;
+        for( let cNodes = this._cNodes.list(), c = cNodes.length; c--; ) {
+            cNodes[ c ]._countSequences( minCount, count );
+            if( minCount > 0 && minCount === count.value ) { break }
+        }
+        return count.value;
+    }
     /** can only remove child if all childData exist in the descendant nodes to form a bounded range (a.k.a. sequence) */
     private _removeChild( childData : Array<T>, currentChildIndex : number = 0 ) : Status {
         const currentNode = this._cNodes.get( childData[ currentChildIndex ] );
@@ -720,7 +712,7 @@ class SortedChildNodes<T = unknown> extends ChildNodes<T> {
     set( node : Node<T> ) {
         let { desc, index } = this._getClosestKeyIndex( node.data );
         if( desc === Compared.EQ ) { return }
-        if( desc === Compared.LT ) { index =+ 1 }
+        if( desc === Compared.LT ) { index += 1 }
         this._splice( robustHash( node.data ), node, index );
     }
     private _getClosestKeyIndex( key : T ) {
