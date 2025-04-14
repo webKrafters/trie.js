@@ -6,7 +6,7 @@
 
 # Introduction
 
-**Trie JS** is a trie data structure for arranging any sequential data type for a speedy search and retrieval
+**Trie JS** is a sortable trie data structure for arranging any sequential data type for a speedy search and retrieval
 
 ### Name:
 

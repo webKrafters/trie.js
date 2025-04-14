@@ -220,6 +220,24 @@ export function getArrayifiedNode() : Array<Array<string>> {
     ];
 }
 
+export function getArrayifiedNodeSorted() : Array<Array<string>> {
+    return [
+        [ 'i', 'd', 'a', 'h', 'o' ],
+        [ 'm', 'a', 'i', 'n', 'e' ],
+        [ 'm', 'i' ],
+        [ 'm', 'i', 'c', 'h', 'i', 'g', 'a', 'n' ],
+        [ 'm', 'i', 's', 's', '.' ],
+        [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ],
+        [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+        [ 'n', 'e', 'v', 'a', 'd', 'a' ],
+        [ 'o', 'h', 'i', 'o' ],
+        [ 'o', 'r' ],
+        [ 'o', 'r', 'e', 'g', 'o', 'n' ],
+        [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
+        [ 't', 'e', 'x', 'a', 's' ]
+      ]
+}
+
 export const getExpectedTrieAsTrieableNode : () => TrieableNode<string> = (() => {
     function noMissingProperty(
         { children = [], ...input } : TrieableNode<string>,

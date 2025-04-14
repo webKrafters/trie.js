@@ -6,7 +6,7 @@
 
 # Introduction
 
-**Trie JS** is a trie data structure for arranging any sequential data type for a speedy search and retrieval
+**Trie JS** is a sortable Trie data structure for arranging any sequential data type for a speedy search and retrieval
 
 ### Name:
 
@@ -47,11 +47,11 @@ npm install --save @webkrafters/trie
 <p>
 To create an instance of this Trie with the following data:<br />
 <code>[ 'Tennessee', 'MI', Nevada', 'Texas', 'Oregon', 'Michigan' ]</code>,<br />
-use the `constructor #4` like so:
+use the <code>constructor #4</code> like so:
 </p>
 
 ```tsx
-const trie = new Trie<string>([
+new Trie<string>([
     [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
     [ 'm', 'i' ],
     [ 't', 'e', 'x', 'a', 's' ],
@@ -59,6 +59,41 @@ const trie = new Trie<string>([
     [ 'm', 'i', 'c', 'h', 'i', 'g', 'a', 'n' ]
 ]); 
 ```
+
+### Sorted Option
+<p>
+  For a sorted instance, add the </code>sorted</code> option at instantiation. A Trie instance created with this option automatically stores items in ascending order:
+</p>
+
+```tsx
+new Trie<string>( data, { sorted: true }); 
+```
+### Working with Complex Data Types
+<p>
+The default <code>lessThanMatcher</code> only allows for a single data type at a time, namely: <code>string</code>, <code>number</code>, <code>bigint</code> and <code>boolean</code>.
+</p>
+<p>
+When working with <b>complex data types</b>, including mixed data types, in a sorted instance, also add a custom <code>lessThanMatcher</code> option at instantiation:
+</p>
+
+```tsx
+new Trie<string>( data, {
+    lessThanMatcher: EqualityFn<string>,
+    sorted: true
+} ); 
+```
+<p>
+This Trie implementation uses <code>sameZeroValue</code> algorithm by default for equality checks for all types. For a more granular control, feel free to add a custom <code>equalityMatcher</code> option at instantiation.
+</p>
+
+```tsx
+new Trie<string>( data, {
+    equalityMatcher: EqualityFn<string>,
+    lessThanMatcher?: EqualityFn<string>,
+    sorted?: boolean
+} ); 
+```
+
 ## Properties
 
 ### isEmpty
@@ -139,7 +174,7 @@ has( sequence : Array<T> ): boolean
 ```
 ### isSame
 <p>
- Confirms that the trie is this instance.
+ Confirms that the Trie is this instance.
  </p>
 
 ```tsx
