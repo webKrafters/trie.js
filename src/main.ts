@@ -569,7 +569,7 @@ export class Node<T = unknown> {
 
 Node.prototype[ Symbol.toStringTag ] = NODE_DESC;
 
-abstract class ChildNodes<T = unknown> {
+export abstract class ChildNodes<T = unknown> {
     protected codes : Array<number>;
     protected keys : Array<T>;
     protected buckets : Array<Array<[Node<T>, number]>>; // [node, keys Index]
@@ -593,14 +593,6 @@ abstract class ChildNodes<T = unknown> {
         }    
         return this._get( key, code );
     }
-    abstract indexOf( data : T ) : number;
-    remove( node : Node<T> ) {
-        const { code, bucketIndex } = this._optForKeyLocator( node.data )
-            ? this._getEntryByKeyIndex( this.indexOf( node.data ) )
-            : this._getEntry(  node.data )
-        this._splice( code, bucketIndex );
-    }
-    set( node : Node<T> ) { this._set( node ) }
     list() {
         const nodes : Array<Node<T>> = [];
         for( let codes = this.codes, cLen = codes.length, c = 0; c < cLen; c++ ) {
@@ -613,6 +605,14 @@ abstract class ChildNodes<T = unknown> {
         }
         return nodes;
     }
+    abstract indexOf( data : T ) : number;
+    remove( node : Node<T> ) {
+        const { code, bucketIndex } = this._optForKeyLocator( node.data )
+            ? this._getEntryByKeyIndex( this.indexOf( node.data ) )
+            : this._getEntry(  node.data )
+        this._splice( code, bucketIndex );
+    }
+    set( node : Node<T> ) { this._set( node ) }
     protected _get( key : T, code : number = null ) {
         const { value } = this._getEntry( key, code );
         if( value === null ) { return null }
@@ -732,36 +732,51 @@ class SortedChildNodes<T = unknown> extends ChildNodes<T> {
 function robustHash<T>( key : T ) { return Math.abs( runHash( key ) ) }
 function runHash<T>(
     key : T,
-    hash = 0,
     visited : Array<unknown> = []
 ) {
-    if( key === null ) { return hash }
+    if( key === null ) { return 0 }
     switch( typeof key ) {
-        case 'string': {
-            for( let k = ( key as string ).length; k--; ) {
-                // Multiply by prime and use bitwise OR to ensure 32-bit int.
-                hash = ( hash * 31 + ( key as string ).charCodeAt( k ) ) | 0;
-            }
-            return hash;
-        };
-        case 'number': return hash + ( key as number | 0 );
-        case 'boolean': return hash + ( key ? 1 : 0 );
-        case 'undefined': return hash;
+        case 'string': return stringHash( key as string );
+        case 'number': return key as number | 0;
+        case 'boolean': return key ? 1 : 0;
+        case 'function': return stringHash( key.toString() )
+        case 'undefined': return 0;
+        case 'symbol': return stringHash( key.description );
+    }
+    {   
+        const _key = key as Record<string, unknown>
+        if( 'hashCode' in _key ) {
+            return runHash(
+                typeof _key.hashCode === 'function'
+                    ? _key.hashCode()
+                    : _key.hashCode
+            );
+        }
     }
     const { desc, index } = bSearch( key, visited );
-    if( desc === Compared.EQ ) { return hash }
+    if( desc === Compared.EQ ) { return 0 }
     visited.splice( index + ( desc === Compared.LT ? 1 : 0 ), 0, key );
+    let hash = 0
     if( Array.isArray( key ) ) {
         for( let k = key.length; k--; ) {
-            hash = runHash( key[ k ], hash, visited );
+            hash += runHash( key[ k ], visited );
         }
         return hash;
     }
     for( let keys = Object.keys( key ).sort(), k = keys.length; k--; ) {
-        hash = runHash( key[ keys[ k ] ], hash, visited );
+        if( keys[ k ] === 'hashCode' ) { continue }
+        hash = runHash( key[ keys[ k ] ], visited );
     }
     return hash;
 }
+function stringHash( key : string ) {
+    let hash = 0;
+    for( let k = ( key as string ).length; k--; ) {
+        // Multiply by prime and use bitwise OR to ensure 32-bit int.
+        hash = ( hash * 31 + ( key as string ).charCodeAt( k ) ) | 0;
+    }
+    return hash;
+};
 
 function bSearch<T = unknown>(
     needle : T,
