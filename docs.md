@@ -94,6 +94,21 @@ new Trie<string>( data, {
 } ); 
 ```
 
+### A Quick Word on Hashing
+<p>This Trie implementation employs a bespoke HashMap implementation under the hood to enhance data retrieval. It applies a default hashing algorithm as part of this HashMap.</p>
+<p>For data objects with <code>hashCode</code> property, that <code>hashCode</code> property will be used instead. Both constant <code>hashCode</code> property and <code>hashCode</code> method types are recognized.</p>
+
+```tsx
+new Trie([
+    [
+      { ..., hashCode(){ return <some value> } },
+      { ..., hashCode: <some value> },
+      ...
+    ],
+    ...
+]); 
+```
+
 ## Properties
 
 ### isEmpty

@@ -1,10 +1,11 @@
-import type { TrieableNode } from './main';
+import type { EqualityFn, TrieableNode } from './main';
 
 import {
     afterAll,
 	beforeAll,
 	describe,
 	expect,
+    jest,
 	test
 } from '@jest/globals';
 
@@ -18,6 +19,7 @@ import {
 } from './test-artifacts/test-data';
 
 import Trie, {
+    ChildNodes,
     LT_TYPES_MSG,
     LT_ARG_TYPES_MISMATCH_MSG,
     Node,
@@ -333,7 +335,7 @@ describe( 'Trie class', () => {
                 typeDesc, data, expectedErrorMsg
             ) => {
                 expect(() => new Trie<unknown>( data, { sorted: true }) ).toThrow( expectedErrorMsg );
-                const lessThanMatcher = jest.fn().mockReturnValue( true );
+                const lessThanMatcher = jest.fn().mockReturnValue( true ) as EqualityFn;
                 new Trie( data, { lessThanMatcher, sorted: true });
                 expect( lessThanMatcher ).toHaveBeenCalled();
             } );
@@ -872,6 +874,62 @@ describe( 'Trie class', () => {
                 expect( status[ 5 ] ).toBe( OpStatus.SUCCESSFUL );
             } );
         
+        } );
+    
+    } );
+
+    describe( "deference to data's own hashCode property whenever present", () => {
+        class Int {
+            v : number;
+            constructor( v ) { this.v = v }
+        }
+        class TNodes extends ChildNodes<Int> {
+            getCodes() { return this.codes }
+            getKeys() { return this.keys }
+            constructor() { super( ( a, b ) => a.v === ( b as Int ).v ) }
+            indexOf( data : Int ) { return this.keys.findIndex( k => this.isEqualValue( data, k ) ) }
+            protected _optForKeyLocator( key: Int ) { return true }
+        }
+        test( 'if hashCode function, resolve and use the computed value', () => {
+            const hashMock = jest.fn();
+            class TestInt extends Int {
+                hashCode() {
+                    hashMock();
+                    return this.v;
+                }
+            }
+            const getInt = v => new Node( new TestInt( v ) as Int );
+            const childNodes = new TNodes();
+            const zeroInt = getInt( 0 );
+            childNodes.set( getInt( 5 ) );
+            childNodes.set( getInt( 32 ) );
+            childNodes.set( zeroInt );
+            childNodes.set( getInt( -1 ) );
+            childNodes.set( zeroInt );
+            expect( hashMock ).toHaveBeenCalledTimes( 5 );
+            hashMock.mockClear();
+            expect( hashMock ).not.toHaveBeenCalled();
+            childNodes.set( getInt( 88 ) );
+            childNodes.set( getInt( 64 ) );
+            expect( hashMock ).toHaveBeenCalledTimes( 2 );
+            expect( childNodes.getCodes() ).toHaveLength( 6 );
+            expect( new Set( childNodes.getCodes() ).size ).toBe( 6 );
+        } );
+        
+        test( 'if constant hashCode, simple use the value as-is', () => {
+            class TestInt extends Int { hashCode = 1024 }
+            const getInt = v => new Node( new TestInt( v ) as Int );
+            const childNodes = new TNodes();
+            const zeroInt = getInt( 0 );
+            childNodes.set( getInt( 5 ) );
+            childNodes.set( getInt( 32 ) );
+            childNodes.set( zeroInt );
+            childNodes.set( getInt( -1 ) );
+            childNodes.set( zeroInt );
+            childNodes.set( getInt( 88 ) );
+            childNodes.set( getInt( 64 ) );
+            expect( childNodes.getCodes() ).toHaveLength( 6 );
+            expect( childNodes.getCodes().every( c => c === 1024 ) ).toBe( true );
         } );
     
     } );
