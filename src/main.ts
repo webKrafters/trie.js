@@ -765,7 +765,7 @@ function runHash<T>(
     }
     for( let keys = Object.keys( key ).sort(), k = keys.length; k--; ) {
         if( keys[ k ] === 'hashCode' ) { continue }
-        hash = runHash( key[ keys[ k ] ], visited );
+        hash += runHash( key[ keys[ k ] ], visited );
     }
     return hash;
 }
