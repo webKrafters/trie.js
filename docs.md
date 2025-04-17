@@ -163,7 +163,6 @@ clear(): void
 clone(): Trie<T>
 ```
 ### getAllStartingWith
-
 <p>
 Produces all complete sequences that begin with the prefix sequence.
 </p>
@@ -178,6 +177,21 @@ An empty prefix sequence will produce an empty array.
 
 ```tsx
 getAllStartingWith( prefix: Array<T> ): Array<Array<T>>
+```
+
+### getFarthestIn
+<p>Finds the longest subsequence within the <code>sequence</code> argument currently existing in this instance. The returned longest subsequence does not have to be a complete sequence.</p>
+<p>
+<strong>Note:</strong><br /> 
+Produces up to and including the sequence if found within this instance.
+</p>
+<p>
+<strong>Note:</strong><br /> 
+An empty sequence will produce an empty array.
+</p>
+
+```tsx
+getFarthestIn( sequence: Array<T> ): prefix: Array<T>
 ```
 ### has
 <p>

@@ -100,7 +100,6 @@ export default class Trie<T = unknown> {
     private isSameValue : EqualityFn<T>;
     private sorted : boolean;
     private root : Node<T>;
-
     /**
      * @param {NESTED_OBJECT} node 
      * @param {TrieableNodeKeyMapping} keyMap - keymap.children can be either an ordered array containing various names of individual properties to combine as children of a trieable node or a single value holding the name of property with either a single value or an iterable.  
@@ -166,7 +165,6 @@ export default class Trie<T = unknown> {
         }
         return t;
     }
-
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>>?} data - Accepts an array of sequences of items to immediately create an initial tree at instantiation.
@@ -215,17 +213,13 @@ export default class Trie<T = unknown> {
                         : [ data ] // a single trieable node child
         );
     }
-
     get isEmpty() { return this.root.isEmpty }
-
     get size () { return this.root.size }
-
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>>} data - Accepts a sequence of items to merge into the trie.
      */
     add( data : Array<T> ) { this.root.addChild([ ...data ]) }
-
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>|TrieableNode<T>>} data - Accepts sequences of items and TrieableNodes or a combination thereof to merge into the trie.
@@ -237,7 +231,6 @@ export default class Trie<T = unknown> {
                 : this.merge( data[ d ] as TrieableNode<T> );
         }
     }
-
     asArray(){
         const array = this.root.asArray();
         for( let i = array.length; i--; ) {
@@ -247,11 +240,8 @@ export default class Trie<T = unknown> {
         }
         return [];
     }
-
     asTrieableNode() { return this.root.asTrieableNode() }
-
     clear() { this.root.empty() }
-
     clone() {
         return new Trie<T>(
             this.asTrieableNode().children, {
@@ -261,9 +251,8 @@ export default class Trie<T = unknown> {
             }
         );
     }
-
     getAllStartingWith( prefix : Array<T> = [] ) {
-        const suffixStartNode = this._getPrefixEndNode( prefix );
+        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
         if( !suffixStartNode ) { return [] }
         const sequences = suffixStartNode.asArray();
         for( let s = sequences.length; s--; ) {
@@ -271,11 +260,13 @@ export default class Trie<T = unknown> {
         }
         return sequences;
     }
-
-    has( sequence : Array<T> ) { return this.root.hasChild( sequence ) }
-
+    getFarthestIn( sequence : Array<T> = [] ) {
+        return sequence.slice( 0, this.root.getDeepestNodeIn( sequence ).index + 1 );
+    }
+    has( sequence : Array<T> ) {
+        return !!this.root.getChildPrefixEnd( sequence )?.isSequenceBoundary;
+    }
     isSame( trie : Trie<T> ) { return this === trie }
-
     matches( graph : Array<Array<T>> ) : boolean;
     matches( graph : Array<TrieableNode<T>> ) : boolean;
     matches( graph : TrieableNode<T> ) : boolean;
@@ -294,7 +285,6 @@ export default class Trie<T = unknown> {
                     }
         );
     }
-
     /**
      * @template {T = unknown}
      * @param {Trie<T>|TrieableNode<T>} data - Accepts a data tree to merge into this trie.
@@ -315,19 +305,16 @@ export default class Trie<T = unknown> {
             this.root.mergeTrieableNode( children[ c ] );
         }
     }
-
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>>} data - Accepts sequences of items to remove from the trie.
      * @returns {boolean} - true is successfully removed; false otherwise
      */
-    remove( data : Array<T> ) { return this.root.removeChild( data ) }
-    
+    remove( data : Array<T> ) { return this.root.removeChild( data ) }   
     removeAllStartingWith( prefix : Array<T> = [] ) {
-        const suffixStartNode = this._getPrefixEndNode( prefix );
+        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
         suffixStartNode?.parentNode.childNodes.remove( suffixStartNode );
     }
-
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>>} data - Accepts sequences of items to remove from the trie.
@@ -343,10 +330,6 @@ export default class Trie<T = unknown> {
             );
         }
         return results;
-    }
-
-    private _getPrefixEndNode( prefix : Array<T> ) {
-        return this.root.getChildPrefixEnd( prefix );
     }
 }
 
@@ -444,20 +427,26 @@ export class Node<T = unknown> {
        return trieableNode;
     }
     empty() { this._cNodes.clear() }
-    getChildPrefixEnd({ length: pLen, ...prefix } : Array<T> = [] ) {
-        if( !pLen ) { return null }
-        let p = 0;
+    getChildPrefixEnd( prefix : Array<T> = [] ) {
+        const deepestInfo = this.getDeepestNodeIn( prefix );
+        return deepestInfo.index === prefix.length - 1
+            ? deepestInfo.node
+            : null;
+    }
+    getDeepestNodeIn({ length: sLen, ...sequence } : Array<T> = [] ) {
+        const result = { index: -1, node: null as Node<T> };
+        if( !sLen ) { return result }
+        let s = 0;
         let currentNode : Node<T> = this;
         do {
-            if( !currentNode.childNodes.size ) { return null }
-            currentNode = currentNode.childNodes.get( prefix[ p ] );
-            if( currentNode === null ) { return null }
-            p++;
-        } while( p < pLen );
-        return currentNode;
-    }
-    hasChild( childData : Array<T> ) {
-        return !!this.getChildPrefixEnd( childData )?._isSequenceBoundary;
+            if( !currentNode.childNodes.size ) { return result }
+            currentNode = currentNode.childNodes.get( sequence[ s ] );
+            if( currentNode === null ) { return result }
+            result.index = s;
+            result.node = currentNode;
+            s++;
+        } while( s < sLen );
+        return result;
     }
     isEqual( graph : Array<Array<T>> ) : boolean;
     isEqual( graph : Node<T> ) : boolean;
