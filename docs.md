@@ -136,13 +136,14 @@ add( data: Array<T> ): void
 <p>Accepts sequences of items and TrieableNodes or a combination thereof to merge into this instance.</p>
 
 ```tsx
-addMany( data : Array<Array<T>|TrieableNode<T>> ): void
+addMany( data: Array<Array<T>|TrieableNode<T>> ): void
 ```
 ### asArray
-<p>Produces all complete sequences in this instance as an array of sequential data.</p>
+<p>Produces all sequences in this instance as an array of sequential data.</p>
+<p>Only complete sequences are returned by default. Set the optional <code>completeSequencesOnly</code> argument to false to produce all sequences in the instance.
 
 ```tsx
-asArray(): Array<Array<T>> 
+asArray( completeSequencesOnly: boolean ): Array<Array<T>> 
 ```
 ### asTrieableNode
 <p>Produces the data in this instance as a TrieableNode.</p>
@@ -164,7 +165,10 @@ clone(): Trie<T>
 ```
 ### getAllStartingWith
 <p>
-Produces all complete sequences that begin with the prefix sequence.
+Produces all sequences that begin with the prefix sequence. Will produce only complete sequences by default. 
+</p>
+<p>
+To get all sequences including incomplete ones, set the optional <code>completeSequencesOnly</code> argument to <code>false</code>.
 </p>
 <p>
 <strong>Note:</strong><br /> 
@@ -176,7 +180,10 @@ An empty prefix sequence will produce an empty array.
 </p>
 
 ```tsx
-getAllStartingWith( prefix: Array<T> ): Array<Array<T>>
+getAllStartingWith(
+  prefix: Array<T>, 
+  completeSequencesOnly: boolean
+): Array<Array<T>>
 ```
 
 ### getFarthestIn
