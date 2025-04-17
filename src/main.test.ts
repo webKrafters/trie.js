@@ -581,10 +581,9 @@ describe( 'Trie class', () => {
             } );
             
             test( 'produces an empty array if no prefix sequence supplied', () => {
-                expect(
-                    new Trie( getArrayifiedNode() )
-                        .getAllStartingWith()
-                ).toEqual([]);
+                const trie = new Trie( getArrayifiedNode() );
+                expect( trie.getAllStartingWith() ).toEqual([]);
+                expect( trie.getAllStartingWith([]) ).toEqual([]);
             } );
            
             test( 'produces an empty array if no complete sequces found preceded by the prefix sequence.', () => {
@@ -595,6 +594,44 @@ describe( 'Trie class', () => {
             } );
 
         
+        } );
+
+        describe( 'getFarthestIn(...)', () => {
+
+            test( 'finds the farthest item in sequences currently in this Trie', () => {
+                expect(
+                    new Trie( getArrayifiedNode() )
+                        .getFarthestIn([ 'm', 'i', 'c', 'h', 'o', 'a', 'c', 'a', 'n' ])
+                ).toEqual([ 'm', 'i', 'c', 'h' ]);
+            } );
+
+            test( 'produces an empty sequence if none found in this Trie', () => {
+                expect(
+                    new Trie( getArrayifiedNode() )
+                        .getFarthestIn([ 'w', 'e', 's', 't', ' ', 'v', 'i', 'r', 'g', 'i', 'n', 'i', 'a' ])
+                ).toEqual([]);
+            } );
+
+            test( 'produces an empty sequence for an empty sequence', () => {
+                const trie = new Trie( getArrayifiedNode() );
+                expect( trie.getFarthestIn() ).toEqual([]);
+                expect( trie.getFarthestIn([]) ).toEqual([]);
+            } );
+
+            test( 'produces all items if all found in this Trie', () => {
+                expect(
+                    new Trie( getArrayifiedNode() )
+                        .getFarthestIn([ 'n', 'e', 'v', 'a', 'd', 'a' ])
+                ).toEqual([ 'n', 'e', 'v', 'a', 'd', 'a' ]);
+            } );
+
+            test( 'produces all items if found to be a complete subsequence in this Trie', () => {
+                expect(
+                    new Trie( getArrayifiedNode() )
+                        .getFarthestIn([ 't', 'e', 'n' ])
+                ).toEqual([ 't', 'e', 'n' ]);
+            } );
+
         } );
         
         describe( 'has(...)', () => {
@@ -828,9 +865,11 @@ describe( 'Trie class', () => {
             } );
         
             test( 'removes nothing if no prefix was provided', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 trie.removeAllStartingWith([]);
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                trie.removeAllStartingWith();
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
             } );
         
