@@ -214,7 +214,7 @@ export default class Trie<T = unknown> {
         );
     }
     get isEmpty() { return this.root.isEmpty }
-    get size () { return this.root.size }
+    get size() { return this.root.size }
     /**
      * @template {T = unknown}
      * @param {Array<Array<T>>} data - Accepts a sequence of items to merge into the trie.
@@ -231,8 +231,8 @@ export default class Trie<T = unknown> {
                 : this.merge( data[ d ] as TrieableNode<T> );
         }
     }
-    asArray(){
-        const array = this.root.asArray();
+    asArray( completeSequencesOnly = true ){
+        const array = this.root.asArray( completeSequencesOnly );
         for( let i = array.length; i--; ) {
             if( array[ i ].length ) {
                 return array;
@@ -251,10 +251,13 @@ export default class Trie<T = unknown> {
             }
         );
     }
-    getAllStartingWith( prefix : Array<T> = [] ) {
+    getAllStartingWith(
+        prefix : Array<T> = [],
+        completeSequencesOnly = true
+    ) {
         const suffixStartNode = this.root.getChildPrefixEnd( prefix );
         if( !suffixStartNode ) { return [] }
-        const sequences = suffixStartNode.asArray();
+        const sequences = suffixStartNode.asArray( completeSequencesOnly );
         for( let s = sequences.length; s--; ) {
             sequences[ s ] = prefix.concat( sequences[ s ] );
         }
@@ -393,17 +396,19 @@ export class Node<T = unknown> {
             ) );
     }
     /** converts this node into sequences of data */
-    asArray( depth = 0 ) {
+    asArray( completeSequencesOnly = true, depth = 0 ) {
         const successors : Array<Array<T>> = [];
-        if( this._isSequenceBoundary ) {
+        const cLen = this._cNodes.size
+        if( this._isSequenceBoundary || (
+            !completeSequencesOnly && !cLen
+        ) ) {
             let path : Array<T> = new Array( depth );
             path[ depth - 1 ] = this._data;
             successors.push( path );
         }
-        const cLen = this._cNodes.size
         if( !cLen ) { return successors }
         for( let cNodes = this._cNodes.list(), c = 0; c < cLen; c++ ) {
-            const grandSuccessors = cNodes[ c ].asArray( depth + 1 );
+            const grandSuccessors = cNodes[ c ].asArray( completeSequencesOnly, depth + 1 );
             for( let gLen = grandSuccessors.length, g = 0; g < gLen; g++ ) {
                 if( !this.isRoot ) {
                     grandSuccessors[ g ][ depth - 1 ] = this._data;

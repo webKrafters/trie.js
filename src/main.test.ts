@@ -497,9 +497,29 @@ describe( 'Trie class', () => {
 
         describe( 'asArray(...)', () => {
 
-            test( 'produces this instance data as an array of sequences', () => {
+            test( 'produces this instance data as an array of complete sequences by default', () => {
                 const actuals = new Trie( trieableNode ).asArray();
                 expect( actuals ).toMatchSequences( arrayifiedNode );
+            } );
+
+            test( 'produces all sequences including incomplete ones in this instance', () => {
+                const trie = new Trie( trieableNode );
+                expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
+                expect( trie.asArray( false ) ).toMatchSequences( arrayifiedNode );
+                let mississip = 'mississip';
+                let tenness = 'tenness';
+                trie.removeAllStartingWith(( mississip + 'p' ).split( '' ) );
+                trie.removeAllStartingWith(( tenness + 'e' ).split( '' ) );
+                let data = trie.asArray().map( d => d.join( '' ) );
+                expect( data.every( d => d !== mississip ) ).toBe( true );
+                expect( data.every( d => d !== mississip + 'pi' ) ).toBe( true );
+                expect( data.every( d => d !== tenness ) ).toBe( true );
+                expect( data.every( d => d !== tenness + 'ee' ) ).toBe( true );
+                data = trie.asArray( false ).map( d => d.join( '' ) );
+                expect( data.every( d => d !== mississip ) ).toBe( false );
+                expect( data.every( d => d !== mississip + 'pi' ) ).toBe( true );
+                expect( data.every( d => d !== tenness ) ).toBe( false );
+                expect( data.every( d => d !== tenness + 'ee' ) ).toBe( true );
             } );
 
         } );
@@ -593,7 +613,32 @@ describe( 'Trie class', () => {
                 ).toEqual([]);
             } );
 
-        
+            test( 'produces all sequences with a prefix including incomplete ones in this instance', () => {
+                const trie = new Trie( trieableNode );
+                const prefix = [ 'm', 'i', 's' ];
+                let actual = trie.getAllStartingWith( prefix );
+                const sequences = [
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ];
+                expect( actual ).toMatchSequences( sequences );
+                actual = trie.getAllStartingWith( prefix, false );
+                expect( actual ).toMatchSequences( sequences );
+                let mississip = 'mississip';
+                trie.removeAllStartingWith(( mississip ).split( '' ));
+                expect( trie.getAllStartingWith( prefix ) ).toMatchSequences([
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ]);
+                expect( trie.getAllStartingWith( prefix, false ) ).toMatchSequences([
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ]);
+
+            } );
+
         } );
 
         describe( 'getFarthestIn(...)', () => {
@@ -685,7 +730,7 @@ describe( 'Trie class', () => {
                 expect( trie.matches( trie ) ).toBe( true );
             } );
         
-            test( 'affirms that this instance data can be matched this trie', () => {
+            test( 'affirms that this instance data can be matched to this trie', () => {
                 expect( trie.matches( new Trie( arrayifiedNode ) ) ).toBe( true );
             } );
         
