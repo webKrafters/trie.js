@@ -285,7 +285,7 @@ Accepts sequences of items to remove from the trie. Will record the outcome of t
 </p>
 
 ```tsx
-removeMany(data : Array<Sequence<T>>): Array<OpStatus>
+removeMany(data : Array<Iterable<T>>): Array<OpStatus>
 ```
 
 ## Static
