@@ -248,7 +248,11 @@ describe( 'Trie class', () => {
         } );
 
         test( 'creates a trie using an array of data sequences', () => {
-            const trie = new Trie( arrayifiedNode );
+            let trie = new Trie( arrayifiedNode );
+            expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
+            expect( trie.asTrieableNode() ).toMatchNode( expectedTrieAsTrieableNode );
+            // --- for strings --- //
+            trie = new Trie( arrayifiedNode.map( sArr => sArr.join( '' ) ) );
             expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
             expect( trie.asTrieableNode() ).toMatchNode( expectedTrieAsTrieableNode );
         } );
@@ -269,7 +273,7 @@ describe( 'Trie class', () => {
             } );
 
             test( 'sorts incoming values when added', () => {
-                const trie = new Trie( undefined, { sorted: true } );
+                let trie : Trie<string> = new Trie( undefined, { sorted: true } );
                 expect( trie.asTrieableNode() ).toEqual({
                     children: [],
                     data: null,
@@ -306,6 +310,59 @@ describe( 'Trie class', () => {
                     [ 'o', 'h', 'i', 'o' ],
                     [ 'o', 'r' ],
                     [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ]
+                ]);
+                // --- using strings --- //
+                trie = new Trie(
+                    arrayifiedNode.slice( 0, 4 ).map( sArr => sArr.join( '' ) ),
+                    { sorted: true }
+                );
+                expect( trie.asArray() ).toEqual([
+                    [ 'm', 'a', 'i', 'n', 'e' ],
+                    [ 'm', 'i' ],
+                    [ 'o', 'h', 'i', 'o' ],
+                    [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ]
+                ]);
+                trie.add( 'oregon' );
+                expect( trie.asArray() ).toStrictEqual([
+                    [ 'm', 'a', 'i', 'n', 'e' ],
+                    [ 'm', 'i' ],
+                    [ 'o', 'h', 'i', 'o' ],
+                    [ 'o', 'r', 'e', 'g', 'o', 'n' ],
+                    [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ]
+                ]);
+                trie.add( 'idaho' );
+                expect( trie.asArray() ).toStrictEqual([
+                    [ 'i', 'd', 'a', 'h', 'o' ],
+                    [ 'm', 'a', 'i', 'n', 'e' ],
+                    [ 'm', 'i' ],
+                    [ 'o', 'h', 'i', 'o' ],
+                    [ 'o', 'r', 'e', 'g', 'o', 'n' ],
+                    [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ]
+                ]);
+                trie.addMany([ 'nevada', 'texas', 'michigan' ]);
+                expect( trie.asArray() ).toStrictEqual([
+                    [ 'i', 'd', 'a', 'h', 'o' ],
+                    [ 'm', 'a', 'i', 'n', 'e' ],
+                    [ 'm', 'i' ],
+                    [ 'm', 'i', 'c', 'h', 'i', 'g', 'a', 'n' ],
+                    [ 'n', 'e', 'v', 'a', 'd', 'a' ],
+                    [ 'o', 'h', 'i', 'o' ],
+                    [ 'o', 'r', 'e', 'g', 'o', 'n' ],
+                    [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
+                    [ 't', 'e', 'x', 'a', 's' ]
+                ]);
+                trie.add( 'or' );
+                expect( trie.asArray() ).toStrictEqual([
+                    [ 'i', 'd', 'a', 'h', 'o' ],
+                    [ 'm', 'a', 'i', 'n', 'e' ],
+                    [ 'm', 'i' ],
+                    [ 'm', 'i', 'c', 'h', 'i', 'g', 'a', 'n' ],
+                    [ 'n', 'e', 'v', 'a', 'd', 'a' ],
+                    [ 'o', 'h', 'i', 'o' ],
+                    [ 'o', 'r' ],
+                    [ 'o', 'r', 'e', 'g', 'o', 'n' ],
+                    [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
+                    [ 't', 'e', 'x', 'a', 's' ]
                 ]);
             } );
 
@@ -434,13 +491,20 @@ describe( 'Trie class', () => {
         describe( 'add(...)', () => {
 
             test( 'inserts a sequence into this instance', () => {
-                const throttledEntry = [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ];
-                const abridgedArr = removeSequence( getArrayifiedNode(), throttledEntry );
-                const trie = new Trie( abridgedArr );
-                const asArray = trie.asArray();
+                let throttledEntry = [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ];
+                let abridgedArr = removeSequence( getArrayifiedNode(), throttledEntry );
+                let trie = new Trie( abridgedArr );
+                let asArray = trie.asArray();
                 expect( asArray ).toMatchSequences( abridgedArr );
                 expect( asArray ).not.toMatchSequences( arrayifiedNode );
                 trie.add( throttledEntry );
+                expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
+                // --- using strings --- //
+                trie = new Trie( abridgedArr.map( sArr => sArr.join( '' ) ) );
+                asArray = trie.asArray();
+                expect( asArray ).toMatchSequences( abridgedArr );
+                expect( asArray ).not.toMatchSequences( arrayifiedNode );
+                trie.add( throttledEntry.join( '' ) );
                 expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
             } );
 
@@ -462,11 +526,18 @@ describe( 'Trie class', () => {
             afterAll(() => { abridgedArr = throttledEntries = null });
             
             test( 'inserts an array of sequences into this instance', () => {
-                const trie = new Trie( abridgedArr );
-                const asArray = trie.asArray();
+                let trie = new Trie( abridgedArr );
+                let asArray = trie.asArray();
                 expect( asArray ).toMatchSequences( abridgedArr );
                 expect( asArray ).not.toMatchSequences( arrayifiedNode );
                 trie.addMany( throttledEntries );
+                expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
+                // --- using strings --- //
+                trie = new Trie( abridgedArr );
+                asArray = trie.asArray();
+                expect( asArray ).toMatchSequences( abridgedArr );
+                expect( asArray ).not.toMatchSequences( arrayifiedNode );
+                trie.addMany( throttledEntries.map( e => e.join( '' ) ) );
                 expect( trie.asArray() ).toMatchSequences( arrayifiedNode );
             } );
             
@@ -510,12 +581,12 @@ describe( 'Trie class', () => {
                 let tenness = 'tenness';
                 trie.removeAllStartingWith(( mississip + 'p' ).split( '' ) );
                 trie.removeAllStartingWith(( tenness + 'e' ).split( '' ) );
-                let data = trie.asArray().map( d => d.join( '' ) );
+                let data = trie.asArray().map( d => ( d as Array<string> ).join( '' ) );
                 expect( data.every( d => d !== mississip ) ).toBe( true );
                 expect( data.every( d => d !== mississip + 'pi' ) ).toBe( true );
                 expect( data.every( d => d !== tenness ) ).toBe( true );
                 expect( data.every( d => d !== tenness + 'ee' ) ).toBe( true );
-                data = trie.asArray( false ).map( d => d.join( '' ) );
+                data = trie.asArray( false ).map( d => ( d as Array<string> ).join( '' ) );
                 expect( data.every( d => d !== mississip ) ).toBe( false );
                 expect( data.every( d => d !== mississip + 'pi' ) ).toBe( true );
                 expect( data.every( d => d !== tenness ) ).toBe( false );
@@ -580,9 +651,17 @@ describe( 'Trie class', () => {
         describe( 'getAllStartingWith(...)', () => {
 
             test( 'produces an array of sequences starting with a subsequence', () => {
+                const arr = getArrayifiedNode();
                 expect(
-                    new Trie( getArrayifiedNode() )
-                        .getAllStartingWith([ 'm', 'i', 's' ])
+                    new Trie( arr ) .getAllStartingWith([ 'm', 'i', 's' ])
+                ).toMatchSequences([
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ]);
+                // --- using strings --- //
+                expect(
+                    new Trie( arr ).getAllStartingWith( 'mis' )
                 ).toMatchSequences([
                     [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
                     [ 'm', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i' ],
@@ -591,9 +670,16 @@ describe( 'Trie class', () => {
             } );
             
             test( 'produces all up to and including the prefix sequence if a complete sequence', () => {
+                const arr = getArrayifiedNode();
                 expect(
-                    new Trie( getArrayifiedNode() )
-                        .getAllStartingWith([ 'o', 'r' ])
+                    new Trie( arr ).getAllStartingWith([ 'o', 'r' ])
+                ).toMatchSequences([
+                    [ 'o', 'r' ],
+                    [ 'o', 'r', 'e', 'g', 'o', 'n' ]
+                ]);
+                // --- using strings --- //
+                expect(
+                    new Trie( arr ).getAllStartingWith( 'or' )
                 ).toMatchSequences([
                     [ 'o', 'r' ],
                     [ 'o', 'r', 'e', 'g', 'o', 'n' ]
@@ -606,7 +692,7 @@ describe( 'Trie class', () => {
                 expect( trie.getAllStartingWith([]) ).toEqual([]);
             } );
            
-            test( 'produces an empty array if no complete sequces found preceded by the prefix sequence.', () => {
+            test( 'produces an empty array if no complete sequences found preceded by the prefix sequence.', () => {
                 expect(
                     new Trie( getArrayifiedNode() )
                         .getAllStartingWith([ 'w', 'y', 'o' ])
@@ -614,8 +700,8 @@ describe( 'Trie class', () => {
             } );
 
             test( 'produces all sequences with a prefix including incomplete ones in this instance', () => {
-                const trie = new Trie( trieableNode );
-                const prefix = [ 'm', 'i', 's' ];
+                let trie = new Trie( trieableNode );
+                let prefix = [ 'm', 'i', 's' ];
                 let actual = trie.getAllStartingWith( prefix );
                 const sequences = [
                     [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
@@ -637,66 +723,91 @@ describe( 'Trie class', () => {
                     [ 'm', 'i', 's', 's', '.' ]
                 ]);
 
+                // --- using strings --- //
+                trie = new Trie( trieableNode );
+                actual = trie.getAllStartingWith( prefix.join( '' ) );
+                expect( actual ).toMatchSequences( sequences );
+                actual = trie.getAllStartingWith( prefix.join( '' ), false );
+                expect( actual ).toMatchSequences( sequences );
+                trie.removeAllStartingWith( mississip );
+                expect( trie.getAllStartingWith( prefix.join( '' ) ) ).toMatchSequences([
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ]);
+                expect( trie.getAllStartingWith( prefix.join( '' ), false ) ).toMatchSequences([
+                    [ 'm', 'i', 's', 's', 'o', 'u', 'r', 'i' ],
+                    [ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ],
+                    [ 'm', 'i', 's', 's', '.' ]
+                ]);
+
             } );
 
         } );
 
         describe( 'getFarthestIn(...)', () => {
 
+            let trie : Trie<string>;
+            beforeAll(() => { trie = new Trie( getArrayifiedNode() ) });
+
             test( 'finds the farthest item in sequences currently in this Trie', () => {
-                expect(
-                    new Trie( getArrayifiedNode() )
-                        .getFarthestIn([ 'm', 'i', 'c', 'h', 'o', 'a', 'c', 'a', 'n' ])
-                ).toEqual([ 'm', 'i', 'c', 'h' ]);
+                expect( trie.getFarthestIn([
+                    'm', 'i', 'c', 'h', 'o', 'a', 'c', 'a', 'n'
+                ]) ).toEqual([ 'm', 'i', 'c', 'h' ]);
+                // --- using strings --- //
+                expect( trie.getFarthestIn( 'michoacan' ) ).toEqual([ 'm', 'i', 'c', 'h' ]);
             } );
 
             test( 'produces an empty sequence if none found in this Trie', () => {
-                expect(
-                    new Trie( getArrayifiedNode() )
-                        .getFarthestIn([ 'w', 'e', 's', 't', ' ', 'v', 'i', 'r', 'g', 'i', 'n', 'i', 'a' ])
-                ).toEqual([]);
+                expect( trie.getFarthestIn([
+                    'w', 'e', 's', 't', ' ', 'v', 'i', 'r', 'g', 'i', 'n', 'i', 'a'
+                ]) ).toEqual([]);
+                // --- using strings --- //
+                expect( trie.getFarthestIn( 'west virginia' ) ).toEqual([]);
             } );
 
             test( 'produces an empty sequence for an empty sequence', () => {
-                const trie = new Trie( getArrayifiedNode() );
                 expect( trie.getFarthestIn() ).toEqual([]);
                 expect( trie.getFarthestIn([]) ).toEqual([]);
             } );
 
             test( 'produces all items if all found in this Trie', () => {
-                expect(
-                    new Trie( getArrayifiedNode() )
-                        .getFarthestIn([ 'n', 'e', 'v', 'a', 'd', 'a' ])
-                ).toEqual([ 'n', 'e', 'v', 'a', 'd', 'a' ]);
+                expect( trie.getFarthestIn([
+                    'n', 'e', 'v', 'a', 'd', 'a'
+                ]) ).toEqual([ 'n', 'e', 'v', 'a', 'd', 'a' ]);
+                // --- using strings --- //
+                expect( trie.getFarthestIn( 'nevada' ) ).toEqual([ 'n', 'e', 'v', 'a', 'd', 'a' ]);
             } );
 
             test( 'produces all items if found to be a complete subsequence in this Trie', () => {
-                expect(
-                    new Trie( getArrayifiedNode() )
-                        .getFarthestIn([ 't', 'e', 'n' ])
-                ).toEqual([ 't', 'e', 'n' ]);
+                expect( trie.getFarthestIn([ 't', 'e', 'n' ]) ).toEqual([ 't', 'e', 'n' ]);
+                // --- using strings --- //
+                expect( trie.getFarthestIn( 'ten' ) ).toEqual([ 't', 'e', 'n' ]);
             } );
 
         } );
         
         describe( 'has(...)', () => {
+            
             let trie;
             beforeAll(() => { trie = new Trie( getArrayifiedNode() ) });
             afterAll(() => { trie = null });
         
             test( 'affirms for a complete sequence in this instance', () => {
-                expect( trie.has([ 'o', 'r', 'e', 'g', 'o', 'n' ]) )
-                    .toBe( true );
+                expect( trie.has([ 'o', 'r', 'e', 'g', 'o', 'n' ]) ).toBe( true );
+                // --- using strings --- //
+                expect( trie.has( 'oregon' ) ).toBe( true );
             } );
         
             test( 'does not affirm for sequences not in this instance', () => {
-                expect( trie.has([ 'i', 'o', 'w', 'a' ]) )
-                    .toBe( false );
+                expect( trie.has([ 'i', 'o', 'w', 'a' ]) ).toBe( false );
+                // --- using strings --- //
+                expect( trie.has( 'iowa' ) ).toBe( false );
             } );
         
             test( 'does not affirm for imcomplete sequences in this instance', () => {
-                expect( trie.has([ 'm', 'i', 's', 's', 'i' ]) )
-                    .toBe( false );
+                expect( trie.has([ 'm', 'i', 's', 's', 'i' ]) ).toBe( false );
+                // --- using strings --- //
+                expect( trie.has( 'missi' ) ).toBe( false );
             } );
         
         } );
@@ -712,10 +823,9 @@ describe( 'Trie class', () => {
         } );
         
         describe( 'matches(...)', () => {
+
             let trie;
-            beforeAll(() => {
-                trie = new Trie( getArrayifiedNode() )
-            });
+            beforeAll(() => { trie = new Trie( getArrayifiedNode() ) });
             afterAll(() => { trie = null });
         
             test( 'affirms that this instance data can be matched to this trieableNode children', () => {
@@ -732,10 +842,14 @@ describe( 'Trie class', () => {
         
             test( 'affirms that this instance data can be matched to this trie', () => {
                 expect( trie.matches( new Trie( arrayifiedNode ) ) ).toBe( true );
+                // --- using strings --- //
+                expect( trie.matches( new Trie( arrayifiedNode.map( arr => arr.join( '' ) ) ) ) ).toBe( true );
             } );
         
             test( 'affirms that this instance data can be matched this array of sequences', () => {
                 expect( trie.matches( arrayifiedNode ) ).toBe( true );
+                // --- using strings --- //
+                expect( trie.matches( arrayifiedNode.map( arr => arr.join( '' ) ) ) ).toBe( true );
             } );
         
             test( 'affirms that this instance data is a mismatch of unmatched sequences', () => {
@@ -827,43 +941,75 @@ describe( 'Trie class', () => {
         describe( 'remove(...)', () => {
         
             test( 'removes a complete sequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
-                const status = trie.remove([ 't', 'e', 'x', 'a', 's' ]);
+                let status = trie.remove([ 't', 'e', 'x', 'a', 's' ]);
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length - 1 );
+                expect( status ).toBe( true );
+                // --- using strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                status = trie.remove( 'texas' );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length - 1 );
                 expect( status ).toBe( true );
             } );
         
             test( 'removes a complete subsequence of a longer sequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
-                const status = trie.remove([ 'o', 'r' ]);
+                let status = trie.remove([ 'o', 'r' ]);
+                expect( trie.has([ 'o', 'r', 'e', 'g', 'o', 'n' ]) ).toBe( true );
+                expect( trie.has([ 'o', 'r' ]) ).toBe( false );
+                expect( status ).toBe( true );
+                // --- using strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                status = trie.remove( 'or' );
                 expect( trie.has([ 'o', 'r', 'e', 'g', 'o', 'n' ]) ).toBe( true );
                 expect( trie.has([ 'o', 'r' ]) ).toBe( false );
                 expect( status ).toBe( true );
             } );
         
             test( 'removes a complete longer sequence while preserving its subsequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
-                const status = trie.remove([ 'o', 'r', 'e', 'g', 'o', 'n' ]);
+                let status = trie.remove([ 'o', 'r', 'e', 'g', 'o', 'n' ]);
                 expect( trie.has([ 'o', 'r', 'e', 'g', 'o', 'n' ]) ).toBe( false );
                 expect( trie.has([ 'o', 'r' ]) ).toBe( true );
+                expect( status ).toBe( true );
+                // --- using string --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                status = trie.remove( 'oregon' );
+                expect( trie.has( 'oregon ') ).toBe( false );
+                expect( trie.has( 'or' ) ).toBe( true );
                 expect( status ).toBe( true );
             } );
         
             test( 'ignores incomplete sequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
-                const status = trie.remove([ 'o', 'r', 'e', 'g' ]);
+                let status = trie.remove([ 'o', 'r', 'e', 'g' ]);
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                expect( status ).toBe( false );
+                // --- using  strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                status = trie.remove( 'oreg' );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 expect( status ).toBe( false );
             } );
         
             test( 'ignores inexistent sequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
-                const status = trie.remove([ 'i', 'o', 'w', 'a' ]);
+                let status = trie.remove([ 'i', 'o', 'w', 'a' ]);
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                expect( status ).toBe( false );
+                // --- using strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                status = trie.remove( 'iowa' );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 expect( status ).toBe( false );
             } );
@@ -873,11 +1019,23 @@ describe( 'Trie class', () => {
         describe( 'removeAllStartingWith(...)', () => {
         
             test( 'removes all under a particular node', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 const prefix = [ 'm', 'i', 's', 's' ];
                 trie.removeAllStartingWith( prefix );
-                const remaining = trie.asArray();
+                let remaining = trie.asArray();
+                expect( remaining ).not.toHaveLength( arrayifiedNode.length );
+                expect( remaining.length ).toBeLessThan( arrayifiedNode.length );
+                expect( trie.asArray() ).toHaveLength(
+                    arrayifiedNode.filter( n => !prefix.every(
+                        ( p, i ) => n[ i ] === p
+                    ) ).length
+                );
+                // --- using strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                trie.removeAllStartingWith( 'miss' );
+                remaining = trie.asArray();
                 expect( remaining ).not.toHaveLength( arrayifiedNode.length );
                 expect( remaining.length ).toBeLessThan( arrayifiedNode.length );
                 expect( trie.asArray() ).toHaveLength(
@@ -888,11 +1046,23 @@ describe( 'Trie class', () => {
             } );
         
             test( 'removes all up to and including the prefix sequence if a complete sequence', () => {
-                const trie = new Trie( arrayifiedNode );
+                let trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 const prefix = [ 'm', 'i' ];
                 trie.removeAllStartingWith( prefix );
-                const remaining = trie.asArray();
+                let remaining = trie.asArray();
+                expect( remaining ).not.toHaveLength( arrayifiedNode.length );
+                expect( remaining.length ).toBeLessThan( arrayifiedNode.length );
+                expect( trie.asArray() ).toHaveLength(
+                    arrayifiedNode.filter( n => !prefix.every(
+                        ( p, i ) => n[ i ] === p
+                    ) ).length
+                );
+                // --- using strings --- //
+                trie = new Trie( arrayifiedNode );
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                trie.removeAllStartingWith( 'mi' );
+                remaining = trie.asArray();
                 expect( remaining ).not.toHaveLength( arrayifiedNode.length );
                 expect( remaining.length ).toBeLessThan( arrayifiedNode.length );
                 expect( trie.asArray() ).toHaveLength(
@@ -906,6 +1076,9 @@ describe( 'Trie class', () => {
                 const trie = new Trie( arrayifiedNode );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 trie.removeAllStartingWith([ 'i', 'l' ]);
+                expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
+                // --- using strings --- //
+                trie.removeAllStartingWith( 'il' );
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
             } );
         
@@ -927,7 +1100,7 @@ describe( 'Trie class', () => {
                 expect( trie.asArray() ).toHaveLength( arrayifiedNode.length );
                 const removed = [
                     [ 'o', 'r' ],
-                    [ 'i', 'd', 'a', 'h', 'o' ],
+                    'idaho',
                     [ 'm', 'a', 'i', 'n', 'e' ]
                 ];
                 const status = trie.removeMany( removed );

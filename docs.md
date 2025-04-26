@@ -31,7 +31,7 @@ npm install --save @webkrafters/trie
 <p>The Trie instance now comprises 3 complete seqeuences.</p>
 <p>The following sequence <code>[ 'm', 'i', 's', 's', 'i', 's', 's', 'i' ]</code>, though present in the instance, is currently an incomplete sequence. But once we add it, it then becomes a complete sequence.</p>
 
-## Constructor (4 Overloads)
+## Constructor (3 Overloads)
 ```tsx
 1. constructor(data?: Trie<T>, opts?: Options<T>);
 ```
@@ -39,10 +39,7 @@ npm install --save @webkrafters/trie
 2. constructor(data?: TrieableNode<T>, opts?: Options<T>);
 ```
 ```tsx
-3. constructor(data?: Array<TrieableNode<T>>, opts?: Options<T>);
-```
-```tsx
-4. constructor( data?: Array<Array<T>>, opts?: Options<T>);
+3. constructor(data?: Array<Iterable<T>|TrieableNode<T>>, opts?: Options<T>);
 ```
 <p>
 To create an instance of this Trie with the following data:<br />
@@ -50,6 +47,10 @@ To create an instance of this Trie with the following data:<br />
 use the <code>constructor #4</code> like so:
 </p>
 
+```tsx
+new Trie<string>([ 'tennessee', 'mi', 'texas', 'oregon', 'michigan' ]);
+```
+***OR***
 ```tsx
 new Trie<string>([
     [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
@@ -130,16 +131,17 @@ size: number
 <p>Accepts a sequence of items to merge into this instance.</p>
 
 ```tsx
-add( data: Array<T> ): void
+add( data: Iterable<T> ): void
 ```
 ### addMany
 <p>Accepts sequences of items and TrieableNodes or a combination thereof to merge into this instance.</p>
 
 ```tsx
-addMany( data: Array<Array<T>|TrieableNode<T>> ): void
+addMany( data: Array<Iterable<T>|TrieableNode<T>> ): void
 ```
 ### asArray
 <p>Produces all sequences in this instance as an array of sequential data.</p>
+<p><b>Strings are returned as array of <code>chars</code>.</b></p>
 <p>Only complete sequences are returned by default. Set the optional <code>completeSequencesOnly</code> argument to false to produce all sequences in the instance.
 
 ```tsx
@@ -167,6 +169,7 @@ clone(): Trie<T>
 <p>
 Produces all sequences that begin with the prefix sequence. Will produce only complete sequences by default. 
 </p>
+<p><b>Strings are returned as array of <code>chars</code>.</b></p>
 <p>
 To get all sequences including incomplete ones, set the optional <code>completeSequencesOnly</code> argument to <code>false</code>.
 </p>
@@ -181,7 +184,7 @@ An empty prefix sequence will produce an empty array.
 
 ```tsx
 getAllStartingWith(
-  prefix: Array<T>, 
+  prefix: Iterable<T>, 
   completeSequencesOnly: boolean
 ): Array<Array<T>>
 ```
@@ -189,6 +192,7 @@ getAllStartingWith(
 ### getFarthestIn
 <p>Finds the longest subsequence within the <code>sequence</code> argument currently existing in this instance. The returned longest subsequence does not have to be a complete sequence.</p>
 <p>
+<p><b>Strings are returned as array of <code>chars</code>.</b></p>
 <strong>Note:</strong><br /> 
 Produces up to and including the sequence if found within this instance.
 </p>
@@ -198,7 +202,7 @@ An empty sequence will produce an empty array.
 </p>
 
 ```tsx
-getFarthestIn( sequence: Array<T> ): prefix: Array<T>
+getFarthestIn( sequence: Iterable<T> ): Array<T>
 ```
 ### has
 <p>
@@ -206,7 +210,7 @@ Confirms that a complete matching sequence exists in this instance.
 </p>
 
 ```tsx
-has( sequence : Array<T> ): boolean
+has( sequence : Iterable<T> ): boolean
 ```
 ### isSame
 <p>
@@ -222,7 +226,7 @@ Confirms that the supplied graph is a data equivalent of this instance.
 </p>
 
 ```tsx
-1. matches( graph : Array<Array<T>> ): boolean
+1. matches( graph : Array<Iterable<T>> ): boolean
 ```
 ```tsx
 2. matches( graph : Array<TrieableNode<T>> ): boolean
@@ -253,7 +257,7 @@ Returns <code>true</code> if found and removed.
 </p>
 
 ```tsx
- remove( data: Array<T> ): boolean
+ remove( data: Iterable<T> ): boolean
 ```
 ### removeAllStartingWith
 <p>
@@ -269,7 +273,7 @@ An empty prefix sequence will result in no removal.
 </p>
 
 ```tsx
-removeAllStartingWith(prefix : Array<T>): void
+removeAllStartingWith(prefix : Iterable<T>): void
 ```
 
 ### removeMany
@@ -281,7 +285,7 @@ Accepts sequences of items to remove from the trie. Will record the outcome of t
 </p>
 
 ```tsx
-removeMany(data : Array<Array<T>>): Array<OpStatus>
+removeMany(data : Array<Sequence<T>>): Array<OpStatus>
 ```
 
 ## Static

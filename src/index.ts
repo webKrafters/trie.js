@@ -1,10 +1,10 @@
 export type {
     EqualityFn, 
+    KeyType,
     Options,
     OpStatus,
     Status,
     TrieableNode,
-    KeyType,
     TrieableNodeKeyMapping
 } from './main';
 
