@@ -1,4 +1,4 @@
-import { expect } from '@jest/globals';;
+import { expect } from '@jest/globals';
 
 import type { TrieableNode } from './../main';
 

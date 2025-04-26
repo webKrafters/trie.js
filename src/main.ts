@@ -167,20 +167,14 @@ export default class Trie<T = unknown> {
     }
     /**
      * @template {T = unknown}
-     * @param {Array<Array<T>>?} data - Accepts an array of sequences of items to immediately create an initial tree at instantiation.
+     * @param {Array<Sequence<T>>?} data - Accepts an array of sequences of items to immediately create an initial tree at instantiation.
      * @param {Options?} opts - Options to modify certain default behaviors of this object. This instances use a sameValueZero comparison for equality check.
      * @example
      * ( 1 )
      * To create Trie instance with the following data:
      * [ 'Tennessee', 'MI', Nevada', 'Texas', 'Oregon', 'Michigan' ],
      * do the following:
-     * new Trie([
-     *  [ 't', 'e', 'n', 'n', 'e', 's', 's', 'e', 'e' ],
-     *  [ 'm', 'i' ],
-     *  [ 't', 'e', 'x', 'a', 's' ],
-     *  [ 'o', 'r', 'e', 'g', 'o', 'n' ],
-     *  [ 'm', 'i', 'c', 'h', 'i', 'g', 'a', 'n ]
-     * ]) 
+     * new Trie<string>([ 'tennessee', 'mi', nevada', 'texas', 'oregon', 'michigan' ]) 
      * ( 2 )
      * A TrieableNode<T> mappping to a complete Trie<T> has this root node shape:
      * {
@@ -193,8 +187,9 @@ export default class Trie<T = unknown> {
     constructor( data? : Trie<T>, opts? : Options<T> );
     constructor( data? : TrieableNode<T>, opts? : Options<T> );
     constructor( data? : Array<TrieableNode<T>>, opts? : Options<T> );
-    constructor( data? : Array<Array<T>>, opts? : Options<T> );
-    constructor( data = undefined, opts: Options<T> = {} ) {
+    constructor( data? : Array<Iterable<T>>, opts? : Options<T> );
+    constructor( data? : Array<Iterable<T>|TrieableNode<T>>, opts? : Options<T> );
+    constructor( data, opts: Options<T> = {} ) {
         this.sorted = opts.sorted ?? false;
         this.isLessThanValue = opts.sorted === true
             ? opts.lessThanMatcher ?? lessThanValue
@@ -217,21 +212,24 @@ export default class Trie<T = unknown> {
     get size() { return this.root.size }
     /**
      * @template {T = unknown}
-     * @param {Array<Array<T>>} data - Accepts a sequence of items to merge into the trie.
+     * @param {Array<Iterable<T>>} data - Accepts a sequence of items to merge into the trie.
      */
-    add( data : Array<T> ) { this.root.addChild([ ...data ]) }
+    add( data : Iterable<T> ) { this.root.addChild([ ...data ]) }
     /**
      * @template {T = unknown}
-     * @param {Array<Array<T>|TrieableNode<T>>} data - Accepts sequences of items and TrieableNodes or a combination thereof to merge into the trie.
+     * @param {Array<Iterable<T>|TrieableNode<T>>} data - Accepts sequences of items and TrieableNodes or a combination thereof to merge into the trie.
      */
-    addMany( data : Array<Array<T>|TrieableNode<T>> ) {
+    addMany( data : Array<Iterable<T>> ) : void;
+    addMany( data : Array<TrieableNode<T>> ) : void;
+    addMany( data : Array<Iterable<T>|TrieableNode<T>> ) : void;
+    addMany( data ) {
         for( let dLen = data.length, d = 0; d < dLen; d++ ) {
-            Array.isArray( data[ d ] )
-                ? this.add( data[ d ] as Array<T> )
-                : this.merge( data[ d ] as TrieableNode<T> );
+            isIterable( data[ d ]  )
+                ? this.add( data[ d ] )
+                : this.merge( data[ d ] );
         }
     }
-    asArray( completeSequencesOnly = true ){
+    asArray( completeSequencesOnly = true ) : Array<Iterable<T>> {
         const array = this.root.asArray( completeSequencesOnly );
         for( let i = array.length; i--; ) {
             if( array[ i ].length ) {
@@ -252,41 +250,44 @@ export default class Trie<T = unknown> {
         );
     }
     getAllStartingWith(
-        prefix : Array<T> = [],
-        completeSequencesOnly = true
+        prefix : Iterable<T> = [],
+        completeSequencesOnly : boolean = true
     ) {
-        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
-        if( !suffixStartNode ) { return [] }
-        const sequences = suffixStartNode.asArray( completeSequencesOnly );
-        for( let s = sequences.length; s--; ) {
-            sequences[ s ] = prefix.concat( sequences[ s ] );
-        }
-        return sequences;
+        return this._getAllStartingWith([ ...prefix ], completeSequencesOnly );
     }
-    getFarthestIn( sequence : Array<T> = [] ) {
-        return sequence.slice( 0, this.root.getDeepestNodeIn( sequence ).index + 1 );
+    getFarthestIn( sequence : Iterable<T> = [] ) {
+        const _sequence = [ ...sequence ];
+        return _sequence.slice( 0, this.root.getDeepestNodeIn( _sequence ).index + 1 );
     }
-    has( sequence : Array<T> ) {
-        return !!this.root.getChildPrefixEnd( sequence )?.isSequenceBoundary;
+    has( sequence : Iterable<T> ) {
+        return !!this.root.getChildPrefixEnd([ ...sequence ])?.isSequenceBoundary;
     }
     isSame( trie : Trie<T> ) { return this === trie }
-    matches( graph : Array<Array<T>> ) : boolean;
+    matches( graph : Array<Iterable<T>> ) : boolean;
     matches( graph : Array<TrieableNode<T>> ) : boolean;
     matches( graph : TrieableNode<T> ) : boolean;
     matches( graph : Trie<T> ) : boolean;
-    matches( graph ) : boolean {
-        return this.isSame( graph ) || this.root.isEqual(
-            getDescriptor( graph ) === TRIE_DESC
-                ? graph.root
-                : !Array.isArray( graph ) || Array.isArray( graph[ 0 ] )
-                    ? graph
-                    : {
-                        children: graph,
-                        data: null,
-                        isBoundary: false,
-                        parent: null
-                    }
-        );
+    matches( graph ) {
+        if( this.isSame( graph ) ) { return true }
+        let g = graph;
+        if( getDescriptor( graph ) === TRIE_DESC ) { g = g.root }
+        else if( Array.isArray( g ) ) {
+            if( isIterable( g[ 0 ] ) ) {
+                const _g = new Array( g.length );
+                for( let i = _g.length; i--; ) {
+                    _g[ i ] = [ ...g[ i ] ];
+                }
+                g = _g;
+            } else {
+                g = {
+                    children: g,
+                    data: null,
+                    isBoundary: false,
+                    parent: null
+                };
+            }
+        }
+        return this.root.isEqual( g );
     }
     /**
      * @template {T = unknown}
@@ -294,7 +295,7 @@ export default class Trie<T = unknown> {
      */
     merge( data : Trie<T> ) : void;
     merge( data : TrieableNode<T> ) : void;
-    merge( data ) : void {
+    merge( data ) {
         if( getDescriptor( data ) === TRIE_DESC ) {
             for( let children = ( data as Trie<T> ).root.childNodes.list(), cLen = children.length, c = 0; c < cLen; c++ ) {
                 this.root.merge( children[ c ] );
@@ -310,20 +311,20 @@ export default class Trie<T = unknown> {
     }
     /**
      * @template {T = unknown}
-     * @param {Array<Array<T>>} data - Accepts sequences of items to remove from the trie.
+     * @param {Array<Iterable<T>>} data - Accepts sequences of items to remove from the trie.
      * @returns {boolean} - true is successfully removed; false otherwise
      */
-    remove( data : Array<T> ) { return this.root.removeChild( data ) }   
-    removeAllStartingWith( prefix : Array<T> = [] ) {
-        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
+    remove( data : Iterable<T> ) { return this.root.removeChild([ ...data ]) }  
+    removeAllStartingWith( prefix : Iterable<T> = [] )  {
+        const suffixStartNode = this.root.getChildPrefixEnd([ ...prefix ]);
         suffixStartNode?.parentNode.childNodes.remove( suffixStartNode );
     }
     /**
      * @template {T = unknown}
-     * @param {Array<Array<T>>} data - Accepts sequences of items to remove from the trie.
+     * @param {Array<Iterable<T>>} data - Accepts sequences of items to remove from the trie.
      * @returns {Array<"FAILED"|"SUCCESSFUL">} - A list of outcomes for each outcome removed.
      */
-    removeMany( data : Array<Array<T>> ) {
+    removeMany( data : Array<Iterable<T>> ) {
         const results : Array<OpStatus> = [];
         for( let dLen = data.length, d = 0; d < dLen; d++ ) {
             results.push(
@@ -333,6 +334,15 @@ export default class Trie<T = unknown> {
             );
         }
         return results;
+    }
+    private _getAllStartingWith( prefix : Array<T>, completeSequencesOnly ) {
+        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
+        if( !suffixStartNode ) { return [] }
+        const sequences = suffixStartNode.asArray( completeSequencesOnly );
+        for( let s = sequences.length; s--; ) {
+            sequences[ s ] = prefix.concat( sequences[ s ] );
+        }
+        return sequences as Array<Iterable<T>>;
     }
 }
 
@@ -349,7 +359,7 @@ export class Node<T = unknown> {
         data : T|null,
         isEqualValue : EqualityFn<T> = sameValueZero,
         isLessThanValue : EqualityFn<T> = null,
-        successorData : Array<Array<T>|TrieableNode<T>> = [],
+        successorData : Array<Iterable<T>|TrieableNode<T>> = [],
         pNode : Node<T> = null,
         isSequenceBoundary : boolean = false
     ) {
@@ -362,7 +372,7 @@ export class Node<T = unknown> {
             : new ChronoChildNodes( this._isEqualValue );
         this._isSequenceBoundary = isSequenceBoundary;
         for( let dLen = successorData.length, d = 0; d < dLen; d++ ) {
-            Array.isArray( successorData[ d ] )
+            isIterable( successorData[ d ] )
                 ? this.addChild([ ...successorData[ d ] as Array<T> ])
                 : this.mergeTrieableNode( successorData[ d ] as TrieableNode<T> );
         }
@@ -771,7 +781,6 @@ function stringHash( key : string ) {
     }
     return hash;
 };
-
 function bSearch<T = unknown>(
     needle : T,
     haystack : Array<T>,
@@ -793,5 +802,11 @@ function bSearch<T = unknown>(
     }
     return res;
 }
-
 function defaultComparator ( a, b ){ return a < b ? Compared.LT : a > b ? Compared.GT : Compared.EQ }
+function isIterable( sequence ) {
+    if( sequence === null ) { return false }
+    if( typeof sequence[ Symbol.iterator ] === 'function' ) { return true }
+    /* pre-es6 support */
+    const type = getDescriptor( sequence );
+    return type === 'Array' || type === 'String';
+}
