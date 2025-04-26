@@ -167,7 +167,7 @@ export default class Trie<T = unknown> {
     }
     /**
      * @template {T = unknown}
-     * @param {Array<Sequence<T>>?} data - Accepts an array of sequences of items to immediately create an initial tree at instantiation.
+     * @param {Array<Iterable<T>>?} data - Accepts an array of sequences of items to immediately create an initial tree at instantiation.
      * @param {Options?} opts - Options to modify certain default behaviors of this object. This instances use a sameValueZero comparison for equality check.
      * @example
      * ( 1 )
