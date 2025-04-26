@@ -463,22 +463,15 @@ export class Node<T = unknown> {
         } while( s < sLen );
         return result;
     }
-    isEqual( graph : Array<Iterable<T>> ) : boolean;
+    isEqual( graph : Array<Array<T>> ) : boolean;
     isEqual( graph : Node<T> ) : boolean;
     isEqual( graph : TrieableNode<T> ) : boolean;
     isEqual( graph ) : boolean {
         const arr = this.asArray();
-        let cArr : Array<Array<T>>;
-        if( Array.isArray( graph ) ) {
-            if( graph.length !== arr.length ) { return false }
-            cArr = new Array( graph.length );
-            for( let g = graph.length; g--; ) {
-                cArr[ g ] = toArray( graph[ g ] );
-            }
-        } else {
-            cArr = ( getDescriptor( graph ) === NODE_DESC ? graph : new Trie<T>( graph ) ).asArray();
-            if( cArr.length !== arr.length ) { return false }
-        }
+        const cArr = !Array.isArray( graph )
+            ? ( getDescriptor( graph ) === NODE_DESC ? graph : new Trie( graph ) ).asArray()
+            : [ ...graph ];
+        if( cArr.length !== arr.length ) { return false }
         for( let a = arr.length; a--; ) {
             const thisSequence = arr[ a ];
             for( let c = cArr.length; c--; ) {
