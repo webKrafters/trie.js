@@ -255,12 +255,12 @@ export default class Trie<T = unknown> {
     ) {
         return this._getAllStartingWith([ ...prefix ], completeSequencesOnly );
     }
-    getFarthestIn( sequence : Iterable<T> = [] ) {
-        const _sequence = [ ...sequence ];
+    getFarthestIn( sequence : Iterable<T> = [] ) : Iterable<T> {
+        const _sequence = toArray( sequence );
         return _sequence.slice( 0, this.root.getDeepestNodeIn( _sequence ).index + 1 );
     }
     has( sequence : Iterable<T> ) {
-        return !!this.root.getChildPrefixEnd([ ...sequence ])?.isSequenceBoundary;
+        return !!this.root.getChildPrefixEnd( toArray( sequence ) )?.isSequenceBoundary;
     }
     isSame( trie : Trie<T> ) { return this === trie }
     matches( graph : Array<Iterable<T>> ) : boolean;
@@ -275,7 +275,7 @@ export default class Trie<T = unknown> {
             if( isIterable( g[ 0 ] ) ) {
                 const _g = new Array( g.length );
                 for( let i = _g.length; i--; ) {
-                    _g[ i ] = [ ...g[ i ] ];
+                    _g[ i ] = toArray( g[ i ] );
                 }
                 g = _g;
             } else {
@@ -314,9 +314,9 @@ export default class Trie<T = unknown> {
      * @param {Array<Iterable<T>>} data - Accepts sequences of items to remove from the trie.
      * @returns {boolean} - true is successfully removed; false otherwise
      */
-    remove( data : Iterable<T> ) { return this.root.removeChild([ ...data ]) }  
+    remove( data : Iterable<T> ) { return this.root.removeChild( toArray( data ) ) }  
     removeAllStartingWith( prefix : Iterable<T> = [] )  {
-        const suffixStartNode = this.root.getChildPrefixEnd([ ...prefix ]);
+        const suffixStartNode = this.root.getChildPrefixEnd( toArray( prefix ) );
         suffixStartNode?.parentNode.childNodes.remove( suffixStartNode );
     }
     /**
@@ -373,7 +373,7 @@ export class Node<T = unknown> {
         this._isSequenceBoundary = isSequenceBoundary;
         for( let dLen = successorData.length, d = 0; d < dLen; d++ ) {
             isIterable( successorData[ d ] )
-                ? this.addChild([ ...successorData[ d ] as Array<T> ])
+                ? this.addChild([ ...successorData[ d ] as Iterable<T> ])
                 : this.mergeTrieableNode( successorData[ d ] as TrieableNode<T> );
         }
     }
@@ -468,11 +468,9 @@ export class Node<T = unknown> {
     isEqual( graph : TrieableNode<T> ) : boolean;
     isEqual( graph ) : boolean {
         const arr = this.asArray();
-        const cArr = Array.isArray( graph )
-            ? [ ...graph ]
-            : getDescriptor( graph ) === NODE_DESC
-                ? graph.asArray()
-                : new Trie( graph ).asArray();
+        const cArr = !Array.isArray( graph )
+            ? ( getDescriptor( graph ) === NODE_DESC ? graph : new Trie( graph ) ).asArray()
+            : [ ...graph ];
         if( cArr.length !== arr.length ) { return false }
         for( let a = arr.length; a--; ) {
             const thisSequence = arr[ a ];
@@ -809,4 +807,8 @@ function isIterable( sequence ) {
     /* pre-es6 support */
     const type = getDescriptor( sequence );
     return type === 'Array' || type === 'String';
+}
+
+function toArray<T>( sequence : Iterable<T> ) : Array<T> {
+    return Array.isArray( sequence ) ? sequence : [ ...sequence ];
 }
