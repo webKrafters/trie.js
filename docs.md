@@ -126,7 +126,9 @@ isEmpty: boolean
 ```tsx
 size: number
 ```
-## Methods
+
+## Methods (Scope: Public)
+
 ### add
 <p>Accepts a sequence of items to merge into this instance.</p>
 
@@ -288,6 +290,15 @@ Accepts sequences of items to remove from the trie. Will record the outcome of t
 removeMany(data : Array<Iterable<T>>): Array<OpStatus>
 ```
 
+## Methods (Scope: Protected)
+
+### _getNodeAtPrefixEnd
+<p>Produces the underlying node containing the final value in <code>prefix</code> items.</p>
+<p>Will produce the root node for the empty <code>prefix</code> items.</p>
+
+```tsx
+_getNodeAtPrefixEnd( prefix: Iterable<T> ): Node<T>
+```
 ## Static
 
 ### makeTrieable

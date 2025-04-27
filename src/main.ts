@@ -335,9 +335,15 @@ export default class Trie<T = unknown> {
         }
         return results;
     }
+    protected _getNodeAtPrefixEnd( prefix : Iterable<T> ) {
+        const pSequence = toArray( prefix );
+        return pSequence.length
+            ? this.root.getChildPrefixEnd( pSequence )
+            : this.root;
+    }
     private _getAllStartingWith( prefix : Array<T>, completeSequencesOnly ) {
-        const suffixStartNode = this.root.getChildPrefixEnd( prefix );
-        if( !suffixStartNode ) { return [] }
+        const suffixStartNode = this._getNodeAtPrefixEnd( prefix );
+        if( !suffixStartNode || this.root === suffixStartNode ) { return [] }
         const sequences = suffixStartNode.asArray( completeSequencesOnly );
         for( let s = sequences.length; s--; ) {
             sequences[ s ] = prefix.concat( sequences[ s ] );
