@@ -12,7 +12,7 @@ export enum Compared {
     LT = -1
 };
 
-interface ClosestKeyDesc {
+export interface ClosestKeyDesc {
     desc : Compared;
     index : number;
 };
@@ -61,7 +61,7 @@ const typeMapping = {
     undefined: undefined
 };
 
-const getDescriptor : ( ( obj: any ) => string ) = (() => {
+export const getDescriptor : ( ( obj: any ) => string ) = (() => {
     const t = Object.prototype.toString;
     return obj => {
         const desc = t.call( obj );
@@ -70,7 +70,7 @@ const getDescriptor : ( ( obj: any ) => string ) = (() => {
 })();
 
 /** @throws { TypeError } */
-const lessThanValue : EqualityFn = ( a, b ) => {
+export const lessThanValue : EqualityFn = ( a, b ) => {
     const typeA = typeof a;
     const typeB = typeof b;
     if( typeA === 'undefined' || a === null ) {
@@ -89,7 +89,7 @@ const lessThanValue : EqualityFn = ( a, b ) => {
 };
 
 /** Credit: curtesy of the lodash.eq() imnplementation */
-const sameValueZero : EqualityFn = ( a, b ) => a === b || ( a !== a && b !== b );
+export const sameValueZero : EqualityFn = ( a, b ) => a === b || ( a !== a && b !== b );
 
 const TRIE_DESC = 'webKrafters.Trie';
 
@@ -785,7 +785,7 @@ function stringHash( key : string ) {
     }
     return hash;
 };
-function bSearch<T = unknown>(
+export function bSearch<T = unknown>(
     needle : T,
     haystack : Array<T>,
     compare : ( a, b ) => Compared = defaultComparator
@@ -807,7 +807,7 @@ function bSearch<T = unknown>(
     return res;
 }
 function defaultComparator ( a, b ){ return a < b ? Compared.LT : a > b ? Compared.GT : Compared.EQ }
-function isIterable( sequence ) {
+export function isIterable( sequence ) {
     if( sequence === null ) { return false }
     if( typeof sequence[ Symbol.iterator ] === 'function' ) { return true }
     /* pre-es6 support */
@@ -815,6 +815,6 @@ function isIterable( sequence ) {
     return type === 'Array' || type === 'String';
 }
 
-function toArray<T>( sequence : Iterable<T> ) : Array<T> {
+export function toArray<T>( sequence : Iterable<T> ) : Array<T> {
     return Array.isArray( sequence ) ? sequence : [ ...sequence ];
 }
