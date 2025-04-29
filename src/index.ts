@@ -1,12 +1,9 @@
 export type {
     ClosestKeyDesc,
-    Compared,
     EqualityFn, 
     KeyType,
     Node,
     Options,
-    OpStatus,
-    Status,
     TrieableNode,
     TrieableNodeKeyMapping
 } from './main';
@@ -29,4 +26,9 @@ export const util = {
     toArray
 };
 
-export { default as default } from './main';
+export {
+    Compared,
+    default as default,
+    OpStatus,
+    Status,
+} from './main';
