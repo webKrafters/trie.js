@@ -6,7 +6,7 @@ export interface Options<T = unknown> {
     sorted? : boolean;
 };
 
-export enum Compared {
+export const enum Compared {
     EQ = 0,
     GT = 1,
     LT = -1
@@ -17,12 +17,12 @@ export interface ClosestKeyDesc {
     index : number;
 };
 
-export enum OpStatus {
+export const enum OpStatus {
     FAILED = 'FAILED',
     SUCCESSFUL = 'SUCCESSFUL'
 };
 
-export enum Status {
+export const enum Status {
     NOOP = 'NOOP',
     REMOVED = 'REMOVED',
     UPDATED = 'UPDATED'
