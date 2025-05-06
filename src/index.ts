@@ -14,11 +14,13 @@ import {
     isIterable,
     lessThanValue,
     sameValueZero,
+    robustHash,
     toArray
 } from './main';
 
 export const util = {
     bSearch,
+    computeHash: robustHash,
     defaultEqMatcher: sameValueZero,
     defaultLtMatcher: lessThanValue,
     getTypeName: getDescriptor,
