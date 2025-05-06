@@ -737,7 +737,7 @@ class SortedChildNodes<T = unknown> extends ChildNodes<T> {
     protected _optForKeyLocator( key : T ) { return typeof key === 'object' } 
 }
 
-function robustHash<T>( key : T ) { return Math.abs( runHash( key ) ) }
+export function robustHash<T>( key : T ) { return Math.abs( runHash( key ) ) }
 function runHash<T>(
     key : T,
     visited : Array<unknown> = []
