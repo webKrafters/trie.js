@@ -23,6 +23,10 @@ Please see complete documentation here:<br />
 
 [https://github.com/webKrafters/trie.js/blob/master/docs.md](https://github.com/webKrafters/trie.js/blob/master/docs.md)
 
+For a compressed trie implementation, see:<br />
+
+[Radix Trie JS](https://github.com/webKrafters/radix-trie.js/blob/master/README.md)
+
 # License
 MIT
 

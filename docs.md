@@ -401,6 +401,9 @@ const trieableNode = Trie.makeTrieable( nested, keyMap );
 </ol>
 </p> 
 
+# See Also
+[@webKrafters/radix-trie](https://github.com/webKrafters/radix-trie.js/blob/master/README.md)
+
 # License
 MIT
 
